@@ -17,7 +17,7 @@ extern "C" int yywrap(){}
 <INITIAL>[-+]?[0-9]+.[0-9]*          {SAVE_TOKEN; return DOUBLE;}
 <INITIAL>[-+]?[0-9]+                 {SAVE_TOKEN; return INTEGER;}
 
-<INITIAL>"break"  { return BREAK;}
+<INITIAL>"break"  {  return  BREAK;}
 <INITIAL>"bool"   { return BOOL;}
 <INITIAL>"continue" { return CONTINUE;}
 <INITIAL>"else"   { return ELSE;}
@@ -35,6 +35,7 @@ extern "C" int yywrap(){}
 <INITIAL>"use"    { return USE;}
 <INITIAL>"while"  { return WHILE;}
 
+
 <INITIAL>"(" { return LP; }
 <INITIAL>")" { return RP; }
 <INITIAL>"{" { return LC; }
@@ -42,10 +43,11 @@ extern "C" int yywrap(){}
 <INITIAL>"[" { return LB; }
 <INITIAL>"]" { return RB; }
 
+<INITIAL>"=" { return ASSIGN;}
 <INITIAL>">"  { return GT; }
 <INITIAL>">=" { return GE; }
 <INITIAL>"<=" { return LE; }
-<INITIAL>"<"  { return GT; }
+<INITIAL>"<"  { return LT; }
 
 <INITIAL>"==" { return EQ; }
 <INITIAL>"!=" { return NE; }
@@ -66,6 +68,7 @@ extern "C" int yywrap(){}
 <INITIAL>"->" { return RARROW; }
 <INITIAL>"=>" { return FAT_RARROW; }
 <INITIAL>":"  { return COLON; }
+<INITIAL>","  { return COMMA; }
 
 <INITIAL>"+=" {return ADDEQ; }
 <INITIAL>"-=" {return MISEQ; }

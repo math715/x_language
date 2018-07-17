@@ -1,5 +1,5 @@
 %{
-    #include "compiler/node.h"
+    #include "compile/node.h"
     NBlock *program_block;
     extern int yylex();
     void yyerror(const char *s) {
@@ -21,9 +21,13 @@
 }
 
 %token <string> IDENTIFIER INTEGER DOUBLE BOOLEAN
-%token <token>  LC RC
-%token <token>
-%token <token>
+%token <token>  LC RC BREAK EXTERN ASSIGN
+%token <token>  COLON COMMA FUNC
+%token <token>  ADD MIS MUL DIV REM
+%token <token>  ADDEQ MISEQ MULEQ DIVEQ REMEQ BANDEQ BEOREQ BOREQ SHREQ SHLEQ
+%token <token>  FALSE TRUE
+%token <token>  GT GE LE LT EQ NE
+%token <token>  LR RR LP RP
 
 %type <ident> ident
 %type <expr> numeric expr
@@ -43,7 +47,7 @@ stmts : stmt { $$ = new BlockNode();; $$->statements.push_back($<stmt>1); }
         | stmts stmt {$1->statements.push_back($<stmt>2);}
         ;
 
-stmt : var_decl  | func_decl
+stmt : var_decl  | func_decl | extern_decl
         | expr { $$ = new ExpressionStatement(*$1); }
         ;
 
@@ -51,7 +55,61 @@ block : LC stmts RC { $$ = $2 ; }
         | LC RC { $$ = new BlockNode(); }
         ;
 
-var_del : ident ident { $$ = new VariableDeclaration(*$1, $2); }
-        | ident COLON type EQ
+var_decl : ident ident { $$ = new VariableDeclaration(*$1, $2); }
+        | ident type ident EQ expr { $$ = new VariableDeclaration(*$1, *$2, $4); }
+        ;
+
+extern_decl : EXTERN ident ident LC func_decl_args RC
+            { $$ = new ExternDecleration(*$2, *$3, *$5); delete $5;}
+            ;
+
+/*func fn_name ( args... ) -> type */
+func_decl : FUNC ident LC func_decl_args RC RARROW ident
+            { $$ = new FunctionDeclaration(*$7, *$2, *$4); delete $4; }
+            ;
+
+func_decl_args : /*blank*/ { $$ = new VariableList(); }
+            | var_decl { $$ = new VariableList(); $$->push_back($<var_decl>1); }
+            | func_decl_args COMMA var_decl { $1->push_back($<var_decl>1); }
+            ;
+
+
+ident : IDENTIFIER { $$ = new IdentifierNode(*$1); delete $1; }
+            ;
+
+
+scalar : INTEGER { $$ = new IntegerNode( atol($1->c_str())); delete $1; }
+        | DOUBLE { $$ = new DoubleNode( atof($1->c_str())); delete $1; }
+        | FALSE { $$ = new BooleanNode(false); }
+        | TRUE { $$ = new BooleanNode ( true); }
+        ;
+
+expr : ident EQ expr { $$ = new AssignmentNode(*$<ident>1, *$3); }
+        | ident LP call_args RP { $$ = new FunctionCallNode(*$1, *$3); delete $3; }
+        | ident { $<ident>$ = $1 ; }
+        | scalar
+        | expr MUL expr { $$ = new BinaryOperatorNode(*$1, $2, *$3); }
+        | expr DIV expr { $$ = new BinaryOperatorNode(*$1, $2, *$3); }
+        | expr REM expr { $$ = new BinaryOperatorNode(*$1, $2, *$3); }
+        | expr ADD expr { $$ = new BinaryOperatorNode(*$1, $2, *$3); }
+        | expr MIS expr { $$ = new BinaryOperatorNode(*$1, $2, *$3); }
+        | expr SHR expr { $$ = new BinaryOperatorNode(*$1, $2, *$3); }
+        | expr SHL expr { $$ = new BinaryOperatorNode(*$1, $2, *$3); }
+        | expr comparison expr { $$ = new BinaryOperatorNode(*$1, $2, *$3); }
+        | expr opterion_eq expr { $$ = new BinaryOperatorNode(*$1, $2, *$3); }
+        | LP expr RP { $$ = $2 ; }
+        ;
+
+
+
+
+call_args : /*blank*/ { $$ = new ExpressionList(); }
+        | expr { $$ = new ExpressionList(); $$->push_back($1); }
+        | call_args COMMA expr { $$->push_back($3); }
+        ;
+
+comparison : GT | GE | LE | LT | EQ | NE
+
+opterion_eq: ADDEQ | MISEQ | MULEQ | DIVEQ |  REMEQ | BANDEQ | BEOREQ | BOREQ | SHREQ |  SHLEQ
 
 %%
