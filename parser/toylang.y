@@ -51,6 +51,7 @@ stmt : var_decl  | func_decl | extern_decl
         | expr { $$ = new ExpressionStatement(*$1); }
         ;
 
+
 block : LC stmts RC { $$ = $2 ; }
         | LC RC { $$ = new BlockNode(); }
         ;
