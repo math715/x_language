@@ -30,7 +30,7 @@ class CodeGenContext {
 public:
     llvm::Module *module;
     CodeGenContext() {
-        module = new llvm::Module("main");
+        module = new llvm::Module("main", MyContext);
     }
 
     void generateCode(BlockNode *root);

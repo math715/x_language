@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 include_directories(. ${CMAKE_BINARY_DIR})
 
+
+set(CMAKE_CXX_STANDARD 11)
 find_package(BISON)
 find_package(FLEX)
 
