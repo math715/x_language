@@ -1,6 +1,6 @@
 %{
     #include "compile/node.h"
-    NBlock *program_block;
+    BlockNode *program_block;
     extern int yylex();
     void yyerror(const char *s) {
         printf("Error: %s\n", s);
@@ -27,24 +27,30 @@
 %token <token>  ADDEQ MISEQ MULEQ DIVEQ REMEQ BANDEQ BEOREQ BOREQ SHREQ SHLEQ
 %token <token>  FALSE TRUE
 %token <token>  GT GE LE LT EQ NE
-%token <token>  LR RR LP RP
+%token <token>  LR RR LP RP LB RB
+%token <token>  RARROW FAT_RARROW
+%token <token>  SHL SHR
+%token <token>  BOOL
+%token <token> CONTINUE ELSE ELSIF FOR IF LAMBDA MATCH RETURN USE WHILE
+%token <token> STRING STRUCT
+%token <token> LAND LOR BAND BEOR BOR
 
 %type <ident> ident
-%type <expr> numeric expr
+%type <expr> scalar expr
 %type <var_vec> func_decl_args
 %type <expr_vec> call_args
 %type <block> program stmts block
 %type <stmt> stmt var_decl func_decl extern_decl
-%type <token> comparison
+%type <token> comparison opterion_eq
 
 %start program
 
 %%
-program : stmts { programBlock = $1; }
+program : stmts { program_block = $1; }
         ;
 
-stmts : stmt { $$ = new BlockNode();; $$->statements.push_back($<stmt>1); }
-        | stmts stmt {$1->statements.push_back($<stmt>2);}
+stmts : stmt { $$ = new BlockNode(); $$->statements_.push_back($<stmt>1); }
+        | stmts stmt {$1->statements_.push_back($<stmt>2);}
         ;
 
 stmt : var_decl  | func_decl | extern_decl
@@ -53,11 +59,11 @@ stmt : var_decl  | func_decl | extern_decl
 
 
 block : LC stmts RC { $$ = $2 ; }
-        | LC RC { $$ = new BlockNode(); }
+        | LP RP { $$ = new BlockNode(); }
         ;
 
-var_decl : ident ident { $$ = new VariableDeclaration(*$1, $2); }
-        | ident type ident EQ expr { $$ = new VariableDeclaration(*$1, *$2, $4); }
+var_decl : ident ident { $$ = new VariableDeclaration(*$1, *$2); }
+        | ident ident ASSIGN expr { $$ = new VariableDeclaration(*$1, *$2, $4); }
         ;
 
 extern_decl : EXTERN ident ident LC func_decl_args RC
@@ -65,8 +71,8 @@ extern_decl : EXTERN ident ident LC func_decl_args RC
             ;
 
 /*func fn_name ( args... ) -> type */
-func_decl : FUNC ident LC func_decl_args RC RARROW ident
-            { $$ = new FunctionDeclaration(*$7, *$2, *$4); delete $4; }
+func_decl : FUNC ident LC func_decl_args RC RARROW ident block
+            { $$ = new FunctionDeclaration(*$7, *$2, *$4, *$8); delete $4; }
             ;
 
 func_decl_args : /*blank*/ { $$ = new VariableList(); }

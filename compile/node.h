@@ -5,8 +5,9 @@
 #ifndef PROJECT_NODE_H
 #define PROJECT_NODE_H
 
-#include  <llvm/IR/Value.h>
+#include <llvm/IR/Value.h>
 #include <vector>
+#include <string>
 
 class CodeGenContext;
 
@@ -20,8 +21,10 @@ using VariableList = std::vector<VariableDeclaration*>;
 
 class Node {
 public:
-    virtual  ~Node() {}
-    virtual llvm::Value* codeGen(CodeGenContext &context);
+    virtual  ~Node() {};
+    virtual llvm::Value* codeGen(CodeGenContext &context) {
+        return nullptr;
+    }
 };
 
 class Expression : public Node {
@@ -103,7 +106,8 @@ public:
 class BlockNode : public Expression {
 public:
     StatementList  statements_;
-    BlockNode(StatementList &statments) : statements_(statments){}
+//    BlockNode(StatementList &statments) : statements_(statments){}
+    BlockNode() {}
     virtual llvm::Value * codeGen(CodeGenContext &context);
 };
 
@@ -145,6 +149,7 @@ public:
 };
 
 class FunctionDeclaration: public  Statement {
+public:
     const IdentifierNode &type_;
     IdentifierNode &id_;
     VariableList  arguments_;

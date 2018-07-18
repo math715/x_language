@@ -1,7 +1,7 @@
 %{
 #include <string>
-#include "node.h"
-#include "parser.hpp"
+#include "compile/node.h"
+#include "parser.h"
 #define SAVE_TOKEN yylval.string = new std::string(yytext, yyleng)
 #define TOKEN(t) (yylval.token = t)
 
@@ -16,7 +16,6 @@ extern "C" int yywrap(){}
 <INITIAL>[a-zA-Z_][a-zA-Z0-9_]* {SAVE_TOKEN; return IDENTIFIER;}
 <INITIAL>[-+]?[0-9]+.[0-9]*          {SAVE_TOKEN; return DOUBLE;}
 <INITIAL>[-+]?[0-9]+                 {SAVE_TOKEN; return INTEGER;}
-
 <INITIAL>"break"  {  return  BREAK;}
 <INITIAL>"bool"   { return BOOL;}
 <INITIAL>"continue" { return CONTINUE;}
