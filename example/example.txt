@@ -1,5 +1,7 @@
-fn add ( int a , int b) -> int {
-    int c = a * 5
-    return c + b
+fn add (int a) -> int {
+    int x = a * 5
+    return x + 3
 }
-echo(add(10, 3))
+echo(add(11))
+echo(add(12))
+printi(10)
