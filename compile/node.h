@@ -85,10 +85,10 @@ public :
 
 class BinaryOperatorNode: public Expression {
 public:
-    int op_;
     Expression &lhs_;
+    int op_;
     Expression &rhs_;
-    BinaryOperatorNode(Expression &lhs, int op, Expression rhs)
+    BinaryOperatorNode(Expression &lhs, int op, Expression &rhs)
             : lhs_(lhs), op_(op), rhs_(rhs) {}
 
     virtual llvm::Value *codeGen(CodeGenContext &context);

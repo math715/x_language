@@ -1,5 +1,7 @@
 %{
     #include "compile/node.h"
+    #include <cstdio>
+    #include <cstdlib>
     BlockNode *program_block;
     extern int yylex();
     void yyerror(const char *s) {
@@ -31,9 +33,9 @@
 %token <token>  RARROW FAT_RARROW
 %token <token>  SHL SHR
 %token <token>  BOOL
-%token <token> CONTINUE ELSE ELSIF FOR IF LAMBDA MATCH RETURN USE WHILE
-%token <token> STRING STRUCT
-%token <token> LAND LOR BAND BEOR BOR
+%token <token>  CONTINUE ELSE ELSIF FOR IF LAMBDA MATCH RETURN USE WHILE
+%token <token>  STRING STRUCT
+%token <token>  LAND LOR BAND BEOR BOR
 
 %type <ident> ident
 %type <expr> scalar expr
