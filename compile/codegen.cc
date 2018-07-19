@@ -5,12 +5,11 @@
 #include <iostream>
 #include <vector>
 #include "codegen.h"
-//#include "parser.h"
-
-#include <llvm/IR/Constant.h>
 #include "node.h"
+#include "parser.h"
 
-void CodeGenContext::generateCode(BlockNode *root) {
+
+void CodeGenContext::generateCode(BlockNode &root) {
     std::cout << "Generating code ..." << std::endl;
     std::vector<llvm::Type *> arg_types;
     llvm::FunctionType *ftype = llvm::FunctionType::get(llvm::Type::getVoidTy(MyContext), llvm::makeArrayRef(arg_types), false);
@@ -18,14 +17,14 @@ void CodeGenContext::generateCode(BlockNode *root) {
     llvm::BasicBlock *bblock = llvm::BasicBlock::Create(MyContext, "entry", main_function, 0);
 
     pushBlock(bblock);
-    root->codeGen(*this);
+    root.codeGen(*this);
     llvm::ReturnInst::Create(MyContext, bblock);
     popBlock();
 
     std::cout << "Code is generated.\n";
 
-    llvm::PassManager pm;
-    pm.add(createPrintModulePass(outs()));
+    llvm::legacy::PassManager pm;
+    pm.add(llvm::createPrintModulePass(llvm::outs()));
     pm.run(*module);
 
 }
@@ -33,7 +32,11 @@ void CodeGenContext::generateCode(BlockNode *root) {
 
 llvm::GenericValue CodeGenContext::runCode() {
     std::cout << "Running code...\n";
-    llvm::ExecutionEngine *ee = llvm::ExecutionEngine( std::unique_ptr<llvm::Module> ).create();
+    llvm::ExecutionEngine *ee = llvm::EngineBuilder(std::unique_ptr<llvm::Module>(module) ).create();
+    if (ee == nullptr) {
+        std::cerr << "Create Execution Engine Error\n";
+//        return nullptr;
+    }
     ee->finalizeObject();
     std::vector<llvm::GenericValue> noargs;
     llvm::GenericValue v = ee->runFunction(main_function, noargs);
@@ -48,7 +51,7 @@ static llvm::Type *typeOf (const IdentifierNode &type) {
     } else if (type.value_.compare("double") == 0) {
         return llvm::Type::getDoubleTy(MyContext);
     } else if (type.value_.compare("bool") == 0) {
-        return llvm::Type::getBooleanTy(MyContext);
+        return llvm::Type::getInt64Ty(MyContext);
     }
     return llvm::Type::getVoidTy(MyContext);
 }
@@ -74,7 +77,7 @@ llvm::Value* IdentifierNode::codeGen(CodeGenContext &context) {
         std::cerr << "undeclared variable " << value_ << std::endl;
         return nullptr;
     }
-    return new llvm::Loadinst(context.locals()[value_], "", false, context.currentBlock());
+    return new llvm::LoadInst(context.locals()[value_], "", false, context.currentBlock());
 }
 
 llvm::Value* FunctionCallNode::codeGen(CodeGenContext &context) {
@@ -84,7 +87,7 @@ llvm::Value* FunctionCallNode::codeGen(CodeGenContext &context) {
     }
     std::vector<llvm::Value*> args;
     for (auto& it : arguments_) {
-        args.push_back((**it).codeGen(context));
+        args.push_back((*it).codeGen(context));
     }
     llvm::CallInst *call = llvm::CallInst::Create(function, llvm::makeArrayRef(args), "", context.currentBlock());
     std::cout << "Creating method call:" << id_.value_ << std::endl;
@@ -99,8 +102,10 @@ llvm::Value* BinaryOperatorNode::codeGen(CodeGenContext &context) {
         case MIS : instr = llvm::Instruction::Sub; break;
         case MUL : instr = llvm::Instruction::Mul; break;
         case DIV : instr = llvm::Instruction::SDiv; break;
+        default:
+            return nullptr;
     }
-    return llvm::BinaryOperator::Create(instr, lhs_.codeGen(context>), rhs_.codeGen(context), "", context.currentBlock());
+    return llvm::BinaryOperator::Create(instr, lhs_.codeGen(context), rhs_.codeGen(context), "", context.currentBlock());
 }
 
 llvm::Value* AssignmentNode::codeGen(CodeGenContext &context) {
@@ -116,7 +121,7 @@ llvm::Value* BlockNode::codeGen(CodeGenContext &context) {
     llvm::Value *last = nullptr;
     for (auto &it : statements_) {
         std::cout << "Generating code for ..." << typeid(*it).name() << std::endl;
-        last = (**it).codeGen(context);
+        last = (*it).codeGen(context);
     }
     std::cout << "Creating block\n";
     return last;
@@ -133,7 +138,7 @@ llvm::Value* ExpressionStatement::codeGen(CodeGenContext &context) {
 llvm::Value* VariableDeclaration::codeGen(CodeGenContext& context)
 {
     std::cout << "Creating variable declaration " << type_.value_ << " " << id_.value_ << std::endl;
-    llvm::AllocaInst *alloc = new AllocaInst(typeOf(type_), id_.value_.c_str(), context.currentBlock());
+    llvm::AllocaInst *alloc = new llvm::AllocaInst(typeOf(type_), id_.value_.c_str(), context.currentBlock());
     context.locals()[id_.value_] = alloc;
     if (assignment_expr_ != NULL) {
         AssignmentNode assn(id_, *assignment_expr_);
@@ -146,10 +151,10 @@ llvm::Value* ExternDecleration::codeGen(CodeGenContext &context) {
     std::vector<llvm::Type*> argTypes;
     VariableList::const_iterator it;
     for (it = arguments_.begin(); it != arguments_.end(); it++) {
-        argTypes.push_back(typeOf((**it).type));
+        argTypes.push_back(typeOf((*it)->type_));
     }
     llvm::FunctionType *ftype = llvm::FunctionType::get(typeOf(type_), makeArrayRef(argTypes), false);
-    llvm::Function *function = llvm::Function::Create(ftype, llvm::GlobalValue::ExternalLinkage, id_.name.c_str(), context.module);
+    llvm::Function *function = llvm::Function::Create(ftype, llvm::GlobalValue::ExternalLinkage, id_.value_.c_str(), context.module);
     return function;
 }
 
@@ -163,19 +168,20 @@ llvm::Value* ReturnStatement::codeGen(CodeGenContext &context) {
 llvm::Value* FunctionDeclaration::codeGen(CodeGenContext &context) {
     std::vector<llvm::Type *> argTypes;
     for (auto &it : arguments_) {
-        argTypes.push_back(typeOf((**it).type));
+        argTypes.push_back(typeOf((*it).type_));
     }
-    llvm::FunctionType *ftype = llvm::FunctionType::get(typeOf(type), llvm::makeArrayRef(argTypes), false);
+    llvm::FunctionType *ftype = llvm::FunctionType::get(typeOf(type_), llvm::makeArrayRef(argTypes), false);
     llvm::Function *function = llvm::Function::Create(ftype, llvm::GlobalValue::InternalLinkage, id_.value_.c_str(), context.module);
     llvm::BasicBlock *bblock = llvm::BasicBlock::Create(MyContext, "entry", function, 0);
     context.pushBlock(bblock);
     llvm::Function::arg_iterator argsValues = function->arg_begin();
     llvm::Value *argument_value;
     for (auto &it : arguments_) {
-        (**it).codeGen(context);
+        (*it).codeGen(context);
         argument_value = &*argsValues++;
-        argument_value->setName((*it)->id_.value.c_str());
-        llvm::StoreInst *inst = new llvm::StoreInst(argument_value, context, context.locals()[(*it)->id_.value_], false, bblock);
+        argument_value->setName((*it).id_.value_.c_str());
+//        llvm::StoreInst *inst = new llvm::StoreInst(argument_value, context, context.locals()[it->id_.value_], false, bblock);
+        llvm::StoreInst *inst = new llvm::StoreInst(argument_value, context.locals()[it->id_.value_], false, bblock);
 
     }
 

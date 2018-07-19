@@ -8,11 +8,21 @@
 
 #include <stack>
 #include <map>
+#include "llvm/IR/Constants.h"
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Function.h>
+#include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
+//#include "llvm/IR/PassManager.h"
+#include <llvm/IR/LegacyPassManager.h>
+#include <llvm/IR/IRPrintingPasses.h>
+#include <llvm/Pass.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
+
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/TargetSelect.h>
 
 
 class BlockNode;
@@ -36,7 +46,7 @@ public:
         module = new llvm::Module("main", MyContext);
     }
 
-    void generateCode(BlockNode *root);
+    void generateCode(BlockNode &root);
     llvm::GenericValue runCode();
     std::map<std::string, llvm::Value *> &locals() {
         return blocks.top()->locals;

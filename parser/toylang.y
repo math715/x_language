@@ -26,6 +26,7 @@
 %token <token>  LC RC BREAK EXTERN ASSIGN
 %token <token>  COLON COMMA FUNC
 %token <token>  ADD MIS MUL DIV REM
+
 %token <token>  ADDEQ MISEQ MULEQ DIVEQ REMEQ BANDEQ BEOREQ BOREQ SHREQ SHLEQ
 %token <token>  FALSE TRUE
 %token <token>  GT GE LE LT EQ NE
@@ -45,6 +46,9 @@
 %type <stmt> stmt var_decl func_decl extern_decl
 %type <token> comparison opterion_eq
 
+%left ADD MIS
+%left MUL DIV REM
+
 %start program
 
 %%
@@ -57,6 +61,7 @@ stmts : stmt { $$ = new BlockNode(); $$->statements_.push_back($<stmt>1); }
 
 stmt : var_decl  | func_decl | extern_decl
         | expr { $$ = new ExpressionStatement(*$1); }
+        | RETURN expr { $$ = new ReturnStatement(*$2); }
         ;
 
 
@@ -73,13 +78,13 @@ extern_decl : EXTERN ident ident LC func_decl_args RC
             ;
 
 /*func fn_name ( args... ) -> type */
-func_decl : FUNC ident LC func_decl_args RC RARROW ident block
+func_decl : FUNC ident LP func_decl_args RP RARROW ident block
             { $$ = new FunctionDeclaration(*$7, *$2, *$4, *$8); delete $4; }
             ;
 
 func_decl_args : /*blank*/ { $$ = new VariableList(); }
             | var_decl { $$ = new VariableList(); $$->push_back($<var_decl>1); }
-            | func_decl_args COMMA var_decl { $1->push_back($<var_decl>1); }
+            | func_decl_args COMMA var_decl { $1->push_back($<var_decl>3); }
             ;
 
 

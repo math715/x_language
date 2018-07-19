@@ -1,0 +1,5 @@
+fn add ( int a , int b) -> int {
+    int c = a * 5
+    return c + b
+}
+echo(add(10, 3))

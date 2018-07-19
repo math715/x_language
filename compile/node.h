@@ -89,7 +89,9 @@ public:
     int op_;
     Expression &rhs_;
     BinaryOperatorNode(Expression &lhs, int op, Expression &rhs)
-            : lhs_(lhs), op_(op), rhs_(rhs) {}
+            : lhs_(lhs), op_(op), rhs_(rhs) {
+
+    }
 
     virtual llvm::Value *codeGen(CodeGenContext &context);
 
@@ -132,9 +134,13 @@ public:
     IdentifierNode &id_;
     Expression *assignment_expr_;
     VariableDeclaration( const IdentifierNode &type, IdentifierNode &id)
-            : type_(type), id_(id), assignment_expr_(nullptr){}
+            : type_(type), id_(id), assignment_expr_(nullptr){
+
+    }
     VariableDeclaration ( const IdentifierNode &type, IdentifierNode &id, Expression *assignment_expr)
-            : type_(type), id_(id), assignment_expr_(assignment_expr){}
+            : type_(type), id_(id), assignment_expr_(assignment_expr){
+
+    }
     virtual llvm::Value* codeGen(CodeGenContext &context);
 };
 
@@ -155,7 +161,9 @@ public:
     VariableList  arguments_;
     BlockNode &blocks_;
     FunctionDeclaration( const IdentifierNode &type, IdentifierNode &id, VariableList &arguments, BlockNode &blocks)
-            : type_(type), id_(id), arguments_(arguments), blocks_(blocks){}
+            : type_(type), id_(id), arguments_(arguments), blocks_(blocks){
+
+    }
     virtual  llvm::Value *codeGen(CodeGenContext &context);
 };
 
