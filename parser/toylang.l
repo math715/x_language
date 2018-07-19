@@ -37,12 +37,12 @@ while  { printf("keyword: %s\n", yytext); return WHILE;}
 
 
 
-"(" { printf("token: %s\n", yytext); return LP; }
-")" { printf("token: %s\n", yytext); return RP; }
-"{" { printf("token: %s\n", yytext); return LC; }
-"}" { printf("token: %s\n", yytext); return RC; }
-"[" { printf("token: %s\n", yytext); return LB; }
-"]" { printf("token: %s\n", yytext); return RB; }
+"(" { printf("token: ( %s\n", yytext); return LP; }
+")" { printf("token: ) %s\n", yytext); return RP; }
+"{" { printf("token: { %s\n", yytext); return LC; }
+"}" { printf("token: } %s\n", yytext); return RC; }
+"[" { printf("token: [ %s\n", yytext); return LB; }
+"]" { printf("token: ] %s\n", yytext); return RB; }
 
 "="  { return ASSIGN;}
 ">"  { return GT; }

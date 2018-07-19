@@ -73,7 +73,7 @@ var_decl : ident ident { $$ = new VariableDeclaration(*$1, *$2); }
         | ident ident ASSIGN expr { $$ = new VariableDeclaration(*$1, *$2, $4); }
         ;
 
-extern_decl : EXTERN ident ident LC func_decl_args RC
+extern_decl : EXTERN ident ident LP func_decl_args RP
             { $$ = new ExternDecleration(*$2, *$3, *$5); delete $5;}
             ;
 
