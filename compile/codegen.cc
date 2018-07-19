@@ -5,7 +5,7 @@
 #include <iostream>
 #include <vector>
 #include "codegen.h"
-#include "parser.h"
+//#include "parser.h"
 
 #include <llvm/IR/Constant.h>
 #include "node.h"
