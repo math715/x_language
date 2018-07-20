@@ -5,4 +5,4 @@ fn add (int a) -> int {
 }
 echo(add(11))
 echo(add(12))
-printi(10)
+printi(100)

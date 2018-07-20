@@ -138,7 +138,7 @@ llvm::Value* ExpressionStatement::codeGen(CodeGenContext &context) {
 llvm::Value* VariableDeclaration::codeGen(CodeGenContext& context)
 {
     std::cout << "Creating variable declaration " << type_.value_ << " " << id_.value_ << std::endl;
-    llvm::AllocaInst *alloc = new llvm::AllocaInst(typeOf(type_), id_.value_.c_str(), context.currentBlock());
+    llvm::AllocaInst *alloc = new llvm::AllocaInst(typeOf(type_), 8, id_.value_.c_str(), context.currentBlock());
     context.locals()[id_.value_] = alloc;
     if (assignment_expr_ != NULL) {
         AssignmentNode assn(id_, *assignment_expr_);

@@ -24,10 +24,10 @@ message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 #        Instrumentation ProfileData BitWriter OrcJIT TransformUtils ExecutionEngine Target Analysis RuntimeDyld Object MCParser
 #        BitReader MC Core Support
 #        )
-llvm_map_components_to_libnames(llvm_libs core support ExecutionEngine )
-message(STATUS "Using LLVM LIBS ${llvm_libs}")
+#llvm_map_components_to_libnames(llvm_libs core support ExecutionEngine )
 
-add_definitions(${LLVM_DEFINITIONS} -g -O0)
+add_definitions(${LLVM_DEFINITIONS} )
+set(CMAKE_CXX_FLAGS  "-rdynamic")
 message("${LLVM_DEFINITIONS}" )
 #find_program(LLVM_CONFIG NAMES llvm-config)
 set(CMAKE_CXX_COMPILER g++-7)
@@ -35,6 +35,7 @@ llvm_map_components_to_libnames(llvm_libs
         support core irreader Target CodeGen Passes ExecutionEngine
         X86CodeGen X86Desc X86Info X86AsmParser
         )
+message(STATUS "Using LLVM LIBS ${llvm_libs}")
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LLVM_CXXFLAGS}")
 #message("cmake_cxx_flags ${CMAKE_CXX_FLAGS}")
@@ -59,6 +60,7 @@ SET(COMPILER_SOURCE
         compile/corefn.cc
         compile/native.cc)
 add_executable(toy ${BISON_ToyParser_OUTPUTS} ${FLEX_ToyFlex_OUTPUTS} ${COMPILER_SOURCE}  main.cc )
-target_link_libraries(toy ${llvm_libs} LLVMExecutionEngine pthread dl fl z ncurses )
+#target_link_libraries(toy ${llvm_libs} LLVMExecutionEngine pthread dl fl z ncurses )
+target_link_libraries(toy  LLVM pthread  dl z ncurses)
 #target_link_libraries()
 #add_executable(xlang main.cc compile/node.h)

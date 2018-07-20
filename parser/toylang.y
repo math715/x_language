@@ -3,7 +3,7 @@
     #include <cstdio>
     #include <cstdlib>
     BlockNode *program_block;
-    extern int yylex();
+    extern  int yylex();
     void yyerror(const char *s) {
         printf("Error: %s\n", s);
     }
@@ -74,7 +74,7 @@ var_decl : ident ident { $$ = new VariableDeclaration(*$1, *$2); }
         ;
 
 extern_decl : EXTERN ident ident LP func_decl_args RP
-            { $$ = new ExternDecleration(*$2, *$3, *$5); delete $5;}
+            { printf("extern*** \n") ; $$ = new ExternDecleration(*$2, *$3, *$5); delete $5;}
             ;
 
 /*func fn_name ( args... ) -> type */

@@ -5,6 +5,7 @@
 #define SAVE_TOKEN yylval.string = new std::string(yytext, yyleng)
 #define TOKEN(t) (yylval.token = t)
 
+
 %}
 
 %option noyywrap
@@ -25,20 +26,21 @@ for    { printf("keyword: %s\n", yytext); return FOR; }
 if     { printf("keyword: %s\n", yytext); return IF; }
 lambda { printf("keyword: %s\n", yytext); return LAMBDA;}
 match  { printf("keyword: %s\n", yytext); return MATCH;}
-return { printf("keyword: %s\n", yytext); return RETURN;}
+return { printf("keyword:  %s\n", yytext); return TOKEN(RETURN);}
 string { printf("keyword: %s\n", yytext); return STRING;}
 struct { printf("keyword: %s\n", yytext); return STRUCT;}
 true   { printf("keyword: %s\n", yytext); return TRUE;}
 use    { printf("keyword: %s\n", yytext); return USE;}
 while  { printf("keyword: %s\n", yytext); return WHILE;}
+extern { printf("keyword: extern %s\n", yytext); return TOKEN(EXTERN); }
 [a-zA-Z_][a-zA-Z0-9_]*      {printf("identifier: %s\n", yytext); SAVE_TOKEN; return IDENTIFIER;}
 [-+]?[0-9]+\.[0-9]*          {printf("double: %s\n", yytext); SAVE_TOKEN; return DOUBLE;}
 [-+]?[0-9]+                 {printf("int: %s\n", yytext); SAVE_TOKEN; return INTEGER;}
 
 
 
-"(" { printf("token: ( %s\n", yytext); return LP; }
-")" { printf("token: ) %s\n", yytext); return RP; }
+"(" { printf("token: ( %s\n", yytext); return TOKEN(LP); }
+")" { printf("token: ) %s\n", yytext); return TOKEN(RP); }
 "{" { printf("token: { %s\n", yytext); return LC; }
 "}" { printf("token: } %s\n", yytext); return RC; }
 "[" { printf("token: [ %s\n", yytext); return LB; }

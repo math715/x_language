@@ -9,7 +9,7 @@
 extern int yyparse();
 extern BlockNode *program_block;
 
-llvm::Function *createPrintFunction(CodeGenContext &context) {
+llvm::Function *createPrintfFunction(CodeGenContext &context) {
     std::vector<llvm::Type *> printf_arg_types;
     printf_arg_types.push_back(llvm::Type::getInt8PtrTy(MyContext));
 
@@ -54,6 +54,6 @@ void CreateEchoFunction(CodeGenContext &context, llvm::Function *printfFn) {
 }
 
 void createCoreFunctions(CodeGenContext & context) {
-    llvm::Function * printFn = createPrintFunction(context);
+    llvm::Function * printFn = createPrintfFunction(context);
     CreateEchoFunction(context, printFn);
 }
