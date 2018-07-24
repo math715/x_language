@@ -58,7 +58,7 @@ SET(COMPILER_SOURCE
         compile/codegen.h
         compile/codegen.cc
         compile/corefn.cc
-        compile/native.cc)
+        compile/native.cc kaleidoscope/parser.h)
 add_executable(toy ${BISON_ToyParser_OUTPUTS} ${FLEX_ToyFlex_OUTPUTS} ${COMPILER_SOURCE}  main.cc )
 #target_link_libraries(toy ${llvm_libs} LLVMExecutionEngine pthread dl fl z ncurses )
 target_link_libraries(toy  LLVM pthread  dl z ncurses)
