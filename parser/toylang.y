@@ -66,7 +66,7 @@ stmt : var_decl  | func_decl | extern_decl
 
 
 block : LC stmts RC { $$ = $2 ; }
-        | LP RP { $$ = new BlockNode(); }
+        | LC RC { $$ = new BlockNode(); }
         ;
 
 var_decl : ident ident { $$ = new VariableDeclaration(*$1, *$2); }

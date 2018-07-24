@@ -4,6 +4,8 @@
 
 %union{
 
+
+
 }
 
 %token
@@ -14,17 +16,24 @@
 %type
 
 
-%start top
+%start program
 
 %%
-top : stmts { }
+program : stmt_list { }
     ;
 
-stmts : stmt { }
-    | stmts stmt { }
+stmt_list : stmt { }
+    | stmt_list stmt { }
     ;
 
 stmt : var_decl | func_decl | extern_decl
+    |
+
+var_decl : ident  ident {}
+    | ident ident EQ expr {}
+    ;
+
+
 
 
 
